@@ -1,0 +1,182 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <title>8 Values</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <!-- <link rel="stylesheet" type="text/css" media="screen" href="main.css" /> -->
+    <script src="https://cdn.plot.ly/plotly-latest.min.js"></script>
+
+</head>
+<body style="width:100%; height:100%; position: relative; min-height: 500px; margin: 0%;">
+    <script>
+        var d3 = Plotly.d3;
+        var WIDTH_IN_PERCENT_OF_PARENT = 100,
+            HEIGHT_IN_PERCENT_OF_PARENT = 100;
+        var gd3 = d3.select('body')
+            .append('div')
+            .style({
+            width: WIDTH_IN_PERCENT_OF_PARENT + '%',
+            // 'margin-left': (100 - WIDTH_IN_PERCENT_OF_PARENT) / 2 + '%',
+            height: HEIGHT_IN_PERCENT_OF_PARENT + 'vh',
+            // 'margin-top': (100 - HEIGHT_IN_PERCENT_OF_PARENT) / 2 + 'vh'
+        });
+        var gd = gd3.node();
+        var x = [];
+        var y = [];
+        var z = [];
+        var names = [];
+        var color = [];
+        var layout = {
+            scene: {
+                autosize: true,
+                showlegend: true,
+                legend: {
+                    x: 1,
+                    y: 1
+                },
+                aspectratio: {
+                x: 1, y: 1, z: 1,
+                },
+                xaxis: {
+                    title:'World',
+                    nticks: 10,
+                    range:[0, 100],
+                },
+                yaxis: {
+                    title:'Lib',
+                    nticks: 10,
+                    range:[0, 100],
+                },
+                zaxis: {
+                    title:'Prog',
+                    nticks: 10,
+                    range:[0, 100],
+                },
+            },
+            showlegend: true,
+            legend: {
+                x: 1,
+                y: 0.5
+            }
+        };
+        var graph;
+        function plot() {
+            for(var i = 0; i < names.length; i++) {
+                var singname = names[i];
+                var soc = color[i];
+                var globalism = x[i];
+                var lib = y[i];
+                var prog = z[i];
+                var result = "</br>" + singname + "</br>Soc=" + soc + "</br>Global=" + globalism + "</br>Lib=" + lib + "</br>Prog=" + prog;
+                names[i] = result;
+            }
+            for(var i = 0; i < color.length; i++) {
+                color[i] = getColor(color[i]);
+            }
+            var trace = {
+                x:x, y:y, z:z, text:names, hoverinfo: "text",
+                mode: 'markers',
+                marker: {
+                    size: 12,
+                    color: color,
+                    line: {
+                        width: 0.5
+                    },
+                    opacity: 0.8
+                },
+                type: 'scatter3d',
+                scene: 'dataplot',
+                name: "More red = more communist"
+            }
+            graph = Plotly.plot(gd, [trace], layout);
+        }
+        function getColor(value) {
+            value = 100-value;
+            colors = [
+                '#ff0000',
+                '#f20005',
+                '#e6000a',
+                '#d9000f',
+                '#cc0014',
+                '#bf001a',
+                '#b2001f',
+                '#a60024',
+                '#990029',
+                '#8c002e',
+                '#800033',
+                '#730038',
+                '#66003d',
+                '#590042',
+                '#4d0047',
+                '#40004c',
+                '#330052',
+                '#260057',
+                '#19005c',
+                '#0d0061',
+                '#000066',
+            ];
+            for(var i = 0; i < colors.length; i++) {
+                var colour = colors[i];
+                var lowerBound = (i*100.0)/colors.length;
+                var upperBound = ((i+1)*100.0)/colors.length;
+                if(value > lowerBound && value <= upperBound) {
+                    return colour;
+                }
+            }
+        }
+        Plotly.d3.csv('https://DwarvenDistrict.github.io/8val.csv', function(err, rows){
+            function unpack(rows, key) {
+                return rows.map(function(row) { 
+                    return row[key];
+                });
+            }
+            x = unpack(rows, 'globalism');
+            y = unpack(rows, 'lib');
+            z = unpack(rows, 'prog');
+            names = unpack(rows, 'name');
+            color = unpack(rows, 'soc');
+            plot();
+            // var trace1 = {
+            //     x:unpack(rows, 'x'), y: unpack(rows, 'y'), z: unpack(rows, 'z'), text: unpack(rows, 'name'),
+            //     mode: 'markers',
+            //     marker: {
+            //         size: 12,
+            //         line: {
+            //         color: 'rgba(217, 217, 217, 0.14)',
+            //         width: 0.5},
+            //         opacity: 0.8
+            //     },
+            //     type: 'scatter3d'
+            // };
+            // var data = [trace1];
+            // var layout = {scene: {
+            //     autosize: true,
+            //     aspectratio: {
+            //     x: 1, y: 1, z: 1,
+            //     },
+            //     xaxis: {
+            //         title:'Eco',
+            //         nticks: 10,
+            //         range:[0, 100],
+            //     },
+            //     yaxis: {
+            //         title:'World',
+            //         nticks: 10,
+            //         range:[0, 100],
+            //     },
+            //     zaxis: {
+            //         title:'Lib',
+            //         nticks: 10,
+            //         range:[0, 100],
+            //     },
+            // }};
+            // // Plotly.newPlot('myDiv', data, layout);
+            window.onresize = function() {
+                Plotly.Plots.resize(gd);
+            };
+        });
+    </script>
+</body>
+</html>
